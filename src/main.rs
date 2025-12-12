@@ -1,4 +1,7 @@
 use clap::Parser;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 
 #[derive(Parser)]
 struct Cli {
@@ -6,15 +9,20 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args = Cli::parse();
-    let content = std::fs::read_to_string(&args.path).expect("could not read file");
 
-    for line in content.lines() {
+    let f = File::open(&args.path)?;
+    let reader = BufReader::new(f);
+
+
+    for line in reader.lines() {
+        let line = line?;
         if line.contains(&args.pattern) {
             println!("{}", line);
         }
     }
 
+    Ok(())
     
 }
