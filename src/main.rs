@@ -1,28 +1,20 @@
 use clap::Parser;
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufReader;
-
+use anyhow::{Context, Result};
 #[derive(Parser)]
 struct Cli {
     pattern: String,
     path: std::path::PathBuf,
 }
 
-fn main() -> std::io::Result<()> {
+
+fn main() -> Result<()> {
     let args = Cli::parse();
+    let content = std::fs::read_to_string(&args.path).with_context(|| format!("could not read file `{}`", args.path.display()))?;
 
-    let f = File::open(&args.path)?;
-    let reader = BufReader::new(f);
-
-
-    for line in reader.lines() {
-        let line = line?;
+    for line in content.lines() {
         if line.contains(&args.pattern) {
             println!("{}", line);
         }
     }
-
     Ok(())
-    
 }
